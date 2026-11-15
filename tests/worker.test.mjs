@@ -147,6 +147,22 @@ test('a feed with only future posts sends nothing', async function () {
     assert.equal(store['last-sent'], 'https://example.com/posts/older/');
 });
 
+test('MAILING_ADDRESS adds the address above the unsubscribe link', async function () {
+    env.MAILING_ADDRESS = '123 Example Street, Example City & Area';
+    await run();
+    assert.match(broadcasts[0].html, /123 Example Street, Example City &amp; Area<br \/>\s*<a href="\{\{\{RESEND_UNSUBSCRIBE_URL\}\}\}"/);
+});
+
+test('without MAILING_ADDRESS, or with an empty one, the footer has no address line', async function () {
+    for (var value of [undefined, '', '   ']) {
+        store['last-sent'] = 'https://example.com/posts/older/';
+        broadcasts = [];
+        env.MAILING_ADDRESS = value;
+        await run();
+        assert.match(broadcasts[0].html, /\.<br \/>\s*<a href="\{\{\{RESEND_UNSUBSCRIBE_URL\}\}\}"/);
+    }
+});
+
 test('the same post is only emailed once', async function () {
     await run();
     await run();

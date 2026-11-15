@@ -29,7 +29,7 @@
             <mj-column>
                 <mj-text align="center" font-size="13px" color="#5f5f5f">
                     You're getting this because you subscribed to new posts on <a href="%%site_url%%" style="color: #5f5f5f;">%%site_name%%</a>.<br />
-                    <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color: #5f5f5f;">Unsubscribe</a>
+                    %%mailing_address%%<a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color: #5f5f5f;">Unsubscribe</a>
                 </mj-text>
             </mj-column>
         </mj-section>

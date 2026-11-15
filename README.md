@@ -171,6 +171,7 @@ In Cloudflare, go to **Workers & Pages > paperboy > Settings > Variables and Sec
 | `TIME_ZONE` | `America/Regina` | Used for the post date in the email (optional, defaults to `UTC`) |
 | `DATE_LOCALE` | `en-US` | How the date is written (optional, defaults to `en-GB`, as in "7 November 2026") |
 | `SEND_DELAY_HOURS` | `2` | How long to wait before sending, so you can check the email first (optional, defaults to `2`; use `0` to send right away) |
+| `MAILING_ADDRESS` | `123 Example Street, Example City, Country` | A mailing address for the email's footer, which some anti-spam laws require in commercial emails (optional) |
 
 Then add the API key from Resend as a **Secret** in the same place, named `RESEND_API_KEY`. If you deployed from your computer, you can set it from the terminal instead:
 
@@ -179,6 +180,8 @@ npx wrangler secret put RESEND_API_KEY
 ```
 
 It asks you to paste the key, and stores it encrypted.
+
+Some anti-spam laws require a mailing address in commercial emails. If yours need one, set `MAILING_ADDRESS`, and it appears in the footer, just above the unsubscribe link.
 
 `keep_vars = true` in `wrangler.toml` makes deploys leave these settings alone. If you'd rather keep your settings in the repo, remove `keep_vars` and fill in the commented `[vars]` section in `wrangler.toml` instead.
 
@@ -200,7 +203,7 @@ You can see how much CPU time each run uses under **Workers & Pages > paperboy >
 
 ## Customize
 
-- **The email:** edit `templates/new-post.mjml`. The placeholders you can use are `%%title%%`, `%%description%%`, `%%link%%`, `%%date%%`, `%%site_name%%` and `%%site_url%%`. Keep `{{{RESEND_UNSUBSCRIBE_URL}}}`, since Resend needs it for the unsubscribe link.
+- **The email:** edit `templates/new-post.mjml`. The placeholders you can use are `%%title%%`, `%%description%%`, `%%link%%`, `%%date%%`, `%%site_name%%`, `%%site_url%%` and `%%mailing_address%%`. Keep `{{{RESEND_UNSUBSCRIBE_URL}}}`, since Resend needs it for the unsubscribe link.
 - **The subject:** it's set in `src/index.js`, as `'New post: ' + post.title`.
 - **How often it checks:** change `crons` in `wrangler.toml`.
 

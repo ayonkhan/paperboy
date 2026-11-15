@@ -48,6 +48,8 @@ async function checkFeed(env) {
                 date: post.date,
                 site_name: env.SITE_NAME,
                 site_url: env.SITE_URL
+            }, {
+                mailing_address: mailingAddress(env)
             }),
             send: true,
             // Gives you time to check the email and cancel it in Resend
@@ -145,9 +147,19 @@ function escapeHtml(text) {
         .replace(/"/g, '&quot;');
 }
 
-// Uses %%name%% placeholders, so they never clash with Resend's {{{...}}} ones
-function fill(html, values) {
+// MAILING_ADDRESS adds a line with the address to the footer. Without it, the
+// line is left out completely.
+function mailingAddress(env) {
+    var address = (env.MAILING_ADDRESS || '').trim();
+    if (!address) return '';
+    return escapeHtml(address) + '<br />';
+}
+
+// Uses %%name%% placeholders, so they never clash with Resend's {{{...}}} ones.
+// Text values are escaped. Values in safeHtml are already HTML, and go in as they are.
+function fill(html, values, safeHtml) {
     return html.replace(/%%(\w+)%%/g, function (match, name) {
+        if (safeHtml && name in safeHtml) return safeHtml[name];
         return escapeHtml(values[name] || '');
     });
 }
