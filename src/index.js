@@ -72,17 +72,28 @@ function sendTime(env) {
     return new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
 }
 
-// The feed lists the newest post first, so the first <item> is the one we want
+// Picks the post with the newest date. Most feeds list it first, but not all of
+// them do, so the order in the feed isn't trusted. If no post has a valid date,
+// the first one is used.
 function latestPost(xml, env) {
-    var item = xml.match(/<item>([\s\S]*?)<\/item>/);
-    if (!item) return null;
+    var items = xml.match(/<item>[\s\S]*?<\/item>/g);
+    if (!items) return null;
 
-    var date = new Date(tag(item[1], 'pubDate'));
+    var item = items[0];
+    var date = new Date(tag(item, 'pubDate'));
+    items.forEach(function (other) {
+        var otherDate = new Date(tag(other, 'pubDate'));
+        if (otherDate > date || isNaN(date)) {
+            item = other;
+            date = otherDate;
+        }
+    });
+
     return {
-        title: tag(item[1], 'title'),
-        link: tag(item[1], 'link'),
+        title: tag(item, 'title'),
+        link: tag(item, 'link'),
         // The description is escaped HTML, so decode it once more and strip the tags
-        description: decode(tag(item[1], 'description')).replace(/<[^>]+>/g, '').trim(),
+        description: decode(tag(item, 'description')).replace(/<[^>]+>/g, '').trim(),
         // Shown in the email as "7 November 2026", or however DATE_LOCALE writes it
         date: date.toLocaleDateString(env.DATE_LOCALE || 'en-GB', {
             day: 'numeric', month: 'long', year: 'numeric', timeZone: env.TIME_ZONE || 'UTC'

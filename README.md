@@ -35,15 +35,14 @@ Paperboy only creates the broadcasts. It doesn't collect subscribers, so you'll 
 
 ## How It Works
 
-- `src/index.js` reads the feed, compares the newest post with the last one it created a broadcast for, and creates the broadcast.
+- `src/index.js` reads the feed, finds the newest post by its date, wherever it is in the feed, compares it with the last one it created a broadcast for, and creates the broadcast.
 - `templates/new-post.mjml` is the email template, written in [MJML](https://mjml.io/). It's compiled to HTML on every build. Placeholders use `%%name%%`, so they don't clash with Resend's `{{{...}}}` placeholders.
 - Cloudflare KV (`SENT_POSTS`) remembers the last post it created a broadcast for. On the very first run, it only records the newest post without creating a broadcast, so turning it on doesn't email an old post to everyone.
 
 ## Limitations
 
 - **One post per check.** Each run creates a broadcast for the newest post only. If you publish two posts between checks, only the newer one gets a broadcast, and the older one is skipped. Checks run once an hour by default, set by `crons` in `wrangler.toml`. Leave at least that long between posts if you want an email for each.
-- **Backdated posts are skipped.** A post only counts as new if it's the newest item in the feed, and feeds are usually sorted by each post's date. If you publish a post with a date older than your latest post, it isn't emailed. Set the date to the day you publish it.
-- **Newest post first.** Paperboy uses the first item in the feed and doesn't sort by date. Hugo and most RSS feeds list the newest post first, but check yours.
+- **Backdated posts are skipped.** A post only counts as new if it has the newest date in the feed. If you publish a post with a date older than your latest post, it isn't emailed. Set the date to the day you publish it.
 - **One try per post.** A post is marked as done once Resend accepts the broadcast. If you cancel the scheduled broadcast in Resend, or it fails later, Paperboy won't try again. To send it anyway, create a broadcast for it in Resend yourself.
 - **RSS 2.0 only.** Atom feeds aren't supported.
 
@@ -255,7 +254,7 @@ If a run fails, for example because Resend rejects the broadcast, the error show
 
 **A new post wasn't emailed.**
 - On the very first run, Paperboy only records the newest post. The next new post is the first one to get a broadcast.
-- The post has to be in your live RSS feed. Open `FEED_URL` in a browser and check that it's the first item.
+- The post has to be in your live RSS feed, with the newest date. Open `FEED_URL` in a browser and check its `<pubDate>`.
 - If you published two posts between checks, only the newer one gets a broadcast. See [Limitations](#limitations).
 - Check the broadcast in Resend under **Broadcasts**. It's scheduled to send after `SEND_DELAY_HOURS`, two hours by default.
 

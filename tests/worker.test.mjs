@@ -87,6 +87,26 @@ test('the date follows TIME_ZONE and DATE_LOCALE', async function () {
     assert.match(broadcasts[1].html, /November 7, 2026/);
 });
 
+test('the newest post is picked by date, wherever it is in the feed', async function () {
+    feed = '<rss><channel>' +
+        item('Older Post', 'https://example.com/posts/older/', 'Sat, 01 Nov 2026 12:00:00 +0000', 'Older') +
+        item('Newest Post', 'https://example.com/posts/newest/', 'Mon, 09 Nov 2026 12:00:00 +0000', 'Newest') +
+        item('Oldest Post', 'https://example.com/posts/oldest/', 'Sun, 25 Oct 2026 12:00:00 +0000', 'Oldest') +
+        '</channel></rss>';
+    await run();
+    assert.equal(broadcasts[0].subject, 'New post: Newest Post');
+    assert.equal(store['last-sent'], 'https://example.com/posts/newest/');
+});
+
+test('a post without a valid date never counts as the newest', async function () {
+    feed = '<rss><channel>' +
+        item('No Date', 'https://example.com/posts/no-date/', 'not a date', 'No date') +
+        item('Dated Post', 'https://example.com/posts/dated/', 'Mon, 09 Nov 2026 12:00:00 +0000', 'Dated') +
+        '</channel></rss>';
+    await run();
+    assert.equal(broadcasts[0].subject, 'New post: Dated Post');
+});
+
 test('the same post is only emailed once', async function () {
     await run();
     await run();
