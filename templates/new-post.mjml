@@ -8,8 +8,9 @@
         </mj-attributes>
     </mj-head>
     <mj-body background-color="#eeeff1">
-        <!-- Leaves a strip of background above the card -->
-        <mj-wrapper padding="32px 0 0">
+        <!-- Leaves a strip of background above and beside the card, so it
+             doesn't touch the edges on narrow screens -->
+        <mj-wrapper padding="32px 16px 0">
         <mj-section background-color="#ffffff" border-radius="8px" padding="32px 24px">
             <mj-column>
                 <mj-text font-size="20px" font-weight="700">
