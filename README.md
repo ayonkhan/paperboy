@@ -15,7 +15,7 @@
 
 Once an hour by default, it reads your feed. If the newest post is one it hasn't seen yet, it fills in the email template and creates a broadcast in Resend, scheduled two hours later by default. That gives you time to review the scheduled broadcast in Resend, and cancel it if something looks wrong. Paperboy doesn't check the email itself.
 
-I built it for my Hugo blog, which uses the PaperMod theme, but it works with any site that has an RSS feed, whatever it's built with. It reads the live feed instead of watching your site's repo, so a post with a future date isn't emailed until it's actually published. The email template is simple, so you may want to change it to match your site. See [Customize](#customize).
+I built it for my Hugo blog, which uses the PaperMod theme, but it works with any site that has an RSS feed, whatever it's built with. It reads the live feed instead of watching your site's repo, and skips posts dated in the future, so a scheduled post isn't emailed before its date. The email template is simple, so you may want to change it to match your site. See [Customize](#customize).
 
 Paperboy only creates the broadcasts. It doesn't collect subscribers, so you'll need some way of adding them to a segment in Resend: a subscription form, an import or adding them by hand. On my blog, that's [PaperMod Subscribe](https://github.com/ayonkhan/papermod-subscribe), a subscription form for Hugo sites using PaperMod.
 

@@ -129,6 +129,24 @@ test('&apos; and CDATA sections in the feed are read correctly', async function 
     assert.match(broadcasts[0].html, /Tom &amp; Jerry's new post/);
 });
 
+test('a post dated in the future is skipped until its date', async function () {
+    feed = '<rss><channel>' +
+        item('Scheduled Post', 'https://example.com/posts/scheduled/', 'Tue, 01 Jan 2099 12:00:00 +0000', 'Later') +
+        item('Fish &amp; Chips', 'https://example.com/posts/fish/', 'Sun, 08 Nov 2026 00:30:00 +0000', 'Now') +
+        '</channel></rss>';
+    await run();
+    assert.equal(broadcasts[0].subject, 'New post: Fish & Chips');
+});
+
+test('a feed with only future posts sends nothing', async function () {
+    feed = '<rss><channel>' +
+        item('Scheduled Post', 'https://example.com/posts/scheduled/', 'Tue, 01 Jan 2099 12:00:00 +0000', 'Later') +
+        '</channel></rss>';
+    await run();
+    assert.equal(broadcasts.length, 0);
+    assert.equal(store['last-sent'], 'https://example.com/posts/older/');
+});
+
 test('the same post is only emailed once', async function () {
     await run();
     await run();

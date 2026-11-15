@@ -79,6 +79,14 @@ function latestPost(xml, env) {
     var items = xml.match(/<item>[\s\S]*?<\/item>/g);
     if (!items) return null;
 
+    // Some feeds list scheduled posts early, so posts dated in the future are
+    // skipped until their date arrives
+    var now = new Date();
+    items = items.filter(function (item) {
+        return !(new Date(tag(item, 'pubDate')) > now);
+    });
+    if (!items.length) return null;
+
     var item = items[0];
     var date = new Date(tag(item, 'pubDate'));
     items.forEach(function (other) {
