@@ -25,12 +25,6 @@ Paperboy only creates the broadcasts. It doesn't collect subscribers, so you'll 
 - [Limitations](#limitations)
 - [Requirements](#requirements)
 - [Setup](#setup)
-  - [1. Set Up Resend](#1-set-up-resend)
-  - [2. Deploy Paperboy](#2-deploy-paperboy), in one of three ways:
-    - [A. Fork on GitHub](#a-fork-on-github)
-    - [B. Copy to your own repo](#b-copy-to-your-own-repo)
-    - [C. Deploy from your computer](#c-deploy-from-your-computer)
-  - [3. Fill In the Settings](#3-fill-in-the-settings)
 - [Keep Your Feed Short](#keep-your-feed-short)
 - [Customize](#customize)
 - [Run Locally](#run-locally)
@@ -71,12 +65,12 @@ Here's how the pieces fit together:
 Setup takes three steps:
 
 1. [Set up Resend](#1-set-up-resend)
-2. [Deploy Paperboy](#2-deploy-paperboy), in one of three ways
+2. [Deploy Paperboy](#2-deploy-paperboy), in one of two ways
 3. [Fill in the settings](#3-fill-in-the-settings)
 
 ### 1. Set Up Resend
 
-You'll use three things from Resend in step 3, so keep them handy:
+You'll use three things from Resend when you [fill in the settings](#3-fill-in-the-settings), so keep them handy:
 
 1. **Your sending domain.** Add and verify it under **Domains**. Resend recommends a subdomain, such as `news.example.com`. Your sender address goes on this domain, and becomes `FROM_EMAIL`.
 2. **A segment ID.** Under **Audience**, create a segment for subscribers, and copy its ID. This becomes `SEGMENT_ID`.
@@ -86,73 +80,26 @@ You'll use three things from Resend in step 3, so keep them handy:
 
 Choose one way:
 
-| Option | Best if | Deploys |
-| --- | --- | --- |
-| [A. Fork on GitHub](#a-fork-on-github) | You want the easiest setup, all in the browser | On every push to `main` |
-| [B. Copy to your own repo](#b-copy-to-your-own-repo) | You want your own GitHub or GitLab repo, not a fork | On every push to `main` |
-| [C. Deploy from your computer](#c-deploy-from-your-computer) | You don't need a repo | When you run a command |
+- **[A. From a repo](#a-deploy-from-a-repo):** Cloudflare deploys Paperboy from GitHub or GitLab every time you push to `main`.
+- **[B. From your computer](#b-deploy-from-your-computer):** you deploy it yourself, by running `npm run deploy`.
 
 Each option needs a KV namespace, where Paperboy remembers the last post it created a broadcast for. The steps link to [Create the KV Namespace](#create-the-kv-namespace) when it's time.
 
-#### A. Fork on GitHub
+#### A. Deploy From a Repo
 
-1. Fork this repo on GitHub.
-2. [Create the KV namespace](#create-the-kv-namespace), and put its ID in your fork's `wrangler.toml`. You can edit the file on GitHub, with the pencil icon.
+1. Put Paperboy in your own repo: fork this one, or copy it to a new repo on GitHub or GitLab.
+2. [Create the KV namespace](#create-the-kv-namespace), put its ID in your repo's `wrangler.toml`, and commit the change.
 3. [Connect the repo to Cloudflare](#connect-the-repo-to-cloudflare).
 
-Then go to [step 3](#3-fill-in-the-settings).
+Then continue with [Fill In the Settings](#3-fill-in-the-settings).
 
-#### B. Copy to Your Own Repo
-
-1. Create an empty repo on GitHub or GitLab. Don't add a README or licence, so it stays empty.
-
-2. Clone Paperboy, and go into its folder:
-
-   ```bash
-   git clone https://github.com/ayonkhan/paperboy.git
-   ```
-
-   ```bash
-   cd paperboy
-   ```
-
-3. Point it to your repo instead of this one. Use your repo's URL:
-
-   ```bash
-   git remote set-url origin https://github.com/your-username/your-repo.git
-   ```
-
-4. [Create the KV namespace](#create-the-kv-namespace), put its ID in `wrangler.toml`, and commit the change:
-
-   ```bash
-   git commit -am "Use my KV namespace"
-   ```
-
-5. Push it to your repo:
-
-   ```bash
-   git push -u origin main
-   ```
-
-6. [Connect the repo to Cloudflare](#connect-the-repo-to-cloudflare).
-
-Then go to [step 3](#3-fill-in-the-settings).
-
-#### C. Deploy From Your Computer
+#### B. Deploy From Your Computer
 
 You'll need [Node.js](https://nodejs.org/).
 
-1. Clone Paperboy, and go into its folder:
+1. Download or clone this repo, and open a terminal in its folder.
 
-   ```bash
-   git clone https://github.com/ayonkhan/paperboy.git
-   ```
-
-   ```bash
-   cd paperboy
-   ```
-
-2. Install the dependencies, at the exact versions in `package-lock.json`:
+2. Install the dependencies:
 
    ```bash
    npm ci
@@ -174,7 +121,7 @@ You'll need [Node.js](https://nodejs.org/).
 
    Run it again whenever you change something.
 
-Then go to [step 3](#3-fill-in-the-settings).
+Then continue with [Fill In the Settings](#3-fill-in-the-settings).
 
 #### Create the KV Namespace
 
@@ -219,14 +166,14 @@ In Cloudflare, go to **Workers & Pages > paperboy > Settings > Variables and Sec
 | `SITE_NAME` | `example.com` | Shown at the top and bottom of the email |
 | `SITE_URL` | `https://example.com/` | Where the site name links to |
 | `FEED_URL` | `https://example.com/index.xml` | Your RSS feed |
-| `FROM_EMAIL` | `Your Name <blog@news.example.com>` | The sender, on the domain you verified in step 1 |
+| `FROM_EMAIL` | `Your Name <blog@news.example.com>` | The sender, on the domain you verified in Resend |
 | `REPLY_TO` | `hello@example.com` | Where replies go (optional) |
-| `SEGMENT_ID` | the segment ID from step 1 | Who gets the email |
+| `SEGMENT_ID` | the segment ID from Resend | Who gets the email |
 | `TIME_ZONE` | `America/Regina` | Used for the post date in the email (optional, defaults to `UTC`) |
 | `DATE_LOCALE` | `en-US` | How the date is written (optional, defaults to `en-GB`, as in "7 November 2026") |
 | `SEND_DELAY_HOURS` | `2` | How long to wait before sending, so you can check the email first (optional, defaults to `2`; use `0` to send right away) |
 
-Then add the API key from step 1 as a **Secret** in the same place, named `RESEND_API_KEY`. If you deployed from your computer, you can set it from the terminal instead:
+Then add the API key from Resend as a **Secret** in the same place, named `RESEND_API_KEY`. If you deployed from your computer, you can set it from the terminal instead:
 
 ```bash
 npx wrangler secret put RESEND_API_KEY
@@ -260,11 +207,11 @@ You can see how much CPU time each run uses under **Workers & Pages > paperboy >
 
 ## Run Locally
 
-Running locally means running Paperboy on your own computer, without deploying it. It's for trying out changes, such as a new email template, before they reach Cloudflare and your subscribers. That's different from [option C](#c-deploy-from-your-computer), which deploys Paperboy to Cloudflare, where it runs every hour on its own.
+Running locally means running Paperboy on your own computer, without deploying it. It's for trying out changes, such as a new email template, before they reach Cloudflare and your subscribers. That's different from [option B](#b-deploy-from-your-computer), which deploys Paperboy to Cloudflare, where it runs every hour on its own.
 
-You'll need a clone with the dependencies installed and Wrangler logged in, as in steps 1 to 3 of option C.
+You'll need a copy of this repo with the dependencies installed and Wrangler logged in, as in steps 1 to 3 of option B.
 
-A local run can't see the settings you added in Cloudflare in [step 3](#3-fill-in-the-settings), so it needs its own copy, in a `.dev.vars` file in the project folder. Start from the example:
+A local run can't see the settings you added in Cloudflare in [Fill In the Settings](#3-fill-in-the-settings), so it needs its own copy, in a `.dev.vars` file in the project folder. Start from the example:
 
 ```bash
 cp .dev.vars.example .dev.vars
