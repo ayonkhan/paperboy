@@ -36,7 +36,7 @@ async function checkFeed(env) {
         },
         body: JSON.stringify({
             // Only shown in the Resend dashboard, so each broadcast is easy to find
-            name: post.title,
+            name: shorten(post.title, 70),
             segment_id: env.SEGMENT_ID,
             from: env.FROM_EMAIL,
             reply_to: env.REPLY_TO,
@@ -101,9 +101,20 @@ function latestPost(xml, env) {
     };
 }
 
+// Resend allows broadcast names of up to 70 characters, so longer titles are
+// cut short with an ellipsis. Array.from counts emoji as one character each.
+function shorten(text, max) {
+    var characters = Array.from(text);
+    if (characters.length <= max) return text;
+    return characters.slice(0, max - 1).join('') + '…';
+}
+
 function tag(xml, name) {
     var match = xml.match(new RegExp('<' + name + '>([\\s\\S]*?)</' + name + '>'));
-    return match ? decode(match[1]) : '';
+    if (!match) return '';
+    // Text inside <![CDATA[...]]> is used as it is, without decoding
+    var cdata = match[1].match(/^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/);
+    return cdata ? cdata[1] : decode(match[1]);
 }
 
 function decode(text) {
@@ -113,6 +124,7 @@ function decode(text) {
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
         .replace(/&rsquo;/g, '’')
         .replace(/&amp;/g, '&');
 }

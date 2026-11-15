@@ -107,6 +107,28 @@ test('a post without a valid date never counts as the newest', async function ()
     assert.equal(broadcasts[0].subject, 'New post: Dated Post');
 });
 
+test('a long title is shortened for the broadcast name, but not the subject', async function () {
+    var title = 'A Very Long Title That Goes On and On, Well Past What Resend Allows for Names';
+    feed = '<rss><channel>' +
+        item(title, 'https://example.com/posts/long/', 'Mon, 09 Nov 2026 12:00:00 +0000', 'Long') +
+        '</channel></rss>';
+    await run();
+    assert.equal(Array.from(broadcasts[0].name).length, 70);
+    assert.ok(broadcasts[0].name.endsWith('…'));
+    assert.equal(broadcasts[0].subject, 'New post: ' + title);
+});
+
+test('&apos; and CDATA sections in the feed are read correctly', async function () {
+    feed = '<rss><channel><item>' +
+        '<title>It&apos;s Here</title><link>https://example.com/posts/here/</link>' +
+        '<pubDate>Mon, 09 Nov 2026 12:00:00 +0000</pubDate>' +
+        '<description><![CDATA[<p>Tom &amp; Jerry\'s <b>new</b> post</p>]]></description>' +
+        '</item></channel></rss>';
+    await run();
+    assert.equal(broadcasts[0].subject, 'New post: It\'s Here');
+    assert.match(broadcasts[0].html, /Tom &amp; Jerry's new post/);
+});
+
 test('the same post is only emailed once', async function () {
     await run();
     await run();
